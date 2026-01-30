@@ -13,9 +13,10 @@ export class ChatService {
   async getResponse(
     message: string,
     email: string,
+    id: string,
   ): Promise<{ reply: string }> {
     try {
-      const chatHistory = await this.historyService.getChatHistory(email);
+      const chatHistory = await this.historyService.getChatHistory(id);
 
       let aiHistory: { role: 'user' | 'model'; parts: { text: string }[] }[] =
         [];
@@ -55,7 +56,7 @@ Rules:
       const bot_message: string =
         response.text || 'Sorry, I could not generate a response.';
 
-      await this.historyService.chatHistory(email, message, bot_message);
+      await this.historyService.chatHistory(id, message, bot_message);
 
       return { reply: bot_message };
     } catch (error) {

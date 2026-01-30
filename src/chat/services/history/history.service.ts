@@ -2,14 +2,20 @@ import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Chat } from '../../schemas/chat.schema';
+import { ChatHistorySession } from '../../schemas/chatHistorySession.schema';
 
 @Injectable()
 export class HistoryService {
-  constructor(@InjectModel(Chat.name) private chatModel: Model<Chat>) {}
+  constructor(
+    @InjectModel(Chat.name) private chatModel: Model<Chat>,
+    @InjectModel(ChatHistorySession.name)
+    private chatHistorySessionModel: Model<ChatHistorySession>,
+  ) {}
 
-  async chatHistory(email: string, userMessage: string, botMessage: string) {
+  async chatHistory(id: string, userMessage: string, botMessage: string) {
     try {
-      const chat = await this.chatModel.findOne({ user_email: email });
+      const chat = await this.chatModel.findOne({ _id: id });
+      // const historySession = await this.chatHistorySessionModel.findOne({ })
 
       const messageData = {
         user_message: userMessage,
@@ -21,7 +27,6 @@ export class HistoryService {
       if (!chat) {
         // Create new chat document
         await this.chatModel.create({
-          user_email: email,
           chat_history: [messageData],
         });
         // console.log('done');
@@ -37,9 +42,9 @@ export class HistoryService {
     }
   }
 
-  async getChatHistory(email: string) {
+  async getChatHistory(id: string) {
     try {
-      const chat = await this.chatModel.findOne({ user_email: email });
+      const chat = await this.chatModel.findOne({ _id: id });
       if (chat) {
         const sendHistory = chat.chat_history;
         return sendHistory;

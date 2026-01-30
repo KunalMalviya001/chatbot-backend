@@ -1,4 +1,13 @@
-import { Controller, Post, Body, UseGuards, Req, Get } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  UseGuards,
+  Req,
+  Get,
+  Param,
+  Delete,
+} from '@nestjs/common';
 import { Request } from 'express';
 import { ChatService } from './chat.service';
 import { AuthGuard } from '../common/guards/auth.guard';
@@ -21,28 +30,35 @@ export class ChatController {
 
   @UseGuards(AuthGuard)
   @Post()
-  chat(@Body() body: { message: string }, @Req() req: AuthRequest) {
+  chat(@Body() body: { message: string; id: string }, @Req() req: AuthRequest) {
     const email: string = req.user.sub;
-    return this.chatService.getResponse(body.message, email);
+    return this.chatService.getResponse(body.message, email, body.id);
   }
 
   @UseGuards(AuthGuard)
-  @Get()
-  chatHistory(@Req() req: AuthRequest) {
-    const email: string = req.user.sub;
-    return this.historyService.getChatHistory(email);
+  @Get('history/:id')
+  chatHistory(@Param('id') id: string) {
+    return this.historyService.getChatHistory(id);
   }
-
-  // @UseGuards(AuthGuard)
-  // @Get(':id')
-  // chatHistory(@Param('id') id: string) {
-  //   return this.historyService.getChatHistory(id);
-  // }
 
   @UseGuards(AuthGuard)
   @Get('history')
   getChatHistorySession(@Req() req: AuthRequest) {
     const email = req.user.sub;
     return this.historySessionService.getHistoryArray(email);
+  }
+
+  @UseGuards(AuthGuard)
+  @Post('createSession')
+  createChatSession(@Req() req: AuthRequest) {
+    const email = req.user.sub;
+    return this.historySessionService.createNewSession(email);
+  }
+
+  @UseGuards(AuthGuard)
+  @Delete('history/:id')
+  deleteChatSession(@Param('id') id: string, @Req() req: AuthRequest) {
+    const email = req.user.sub;
+    return this.historySessionService.deleteSession(email, id);
   }
 }
