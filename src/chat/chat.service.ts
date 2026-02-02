@@ -45,7 +45,8 @@ Rules:
 `;
 
       const response = await this.ai.models.generateContent({
-        model: 'gemini-2.5-flash',
+        // model: 'gemini-2.5-flash',
+        model: 'gemini-3-flash-preview',
         contents: [
           { role: 'user', parts: [{ text: systemInstructions }] }, // system instructions
           ...aiHistory, // previous messages
